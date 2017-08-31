@@ -409,7 +409,7 @@ namespace ts {
     }
 
     function compile(fileNames: string[], compilerOptions: CompilerOptions, compilerHost: CompilerHost) {
-        const hasDiagnostics = compilerOptions.diagnostics || compilerOptions.extendedDiagnostics;
+        const hasDiagnostics = compilerOptions.diagnostics || compilerOptions.extendedDiagnostics || compilerOptions.lowMemoryDiagnostics;
         let statistics: Statistic[];
         if (hasDiagnostics) {
             performance.enable();

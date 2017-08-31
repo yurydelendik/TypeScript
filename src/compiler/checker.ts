@@ -52,6 +52,7 @@ namespace ts {
         const Type = objectAllocator.getTypeConstructor();
         const Signature = objectAllocator.getSignatureConstructor();
 
+        let allTypes: Type[];
         let typeCount = 0;
         let symbolCount = 0;
         let enumCount = 0;
@@ -1964,6 +1965,12 @@ namespace ts {
             const result = new Type(checker, flags);
             typeCount++;
             result.id = typeCount;
+            if (compilerOptions.lowMemoryDiagnostics) {
+                if (!allTypes) {
+                    allTypes = [];
+                }
+                allTypes[typeCount] = result;
+            }
             return result;
         }
 
@@ -9269,7 +9276,15 @@ namespace ts {
                     relation.set(id, reportErrors ? RelationComparisonResult.FailedAndReported : RelationComparisonResult.Failed);
                     maybeCount = maybeStart;
                 }
+                if (compilerOptions.lowMemoryDiagnostics && sys.getMemoryUsage && sys.getMemoryUsage() > 1.35e8) {
+                    throw new Error("Compilation too big. " + importantDiagnostics());
+                }
                 return result;
+            }
+
+            function importantDiagnostics() {
+                // loop through the relation looking up types in allTypes cache. Just dump the count initially, then try dereferencing them later
+                return "relation.size: " + relation.size + "; typeCount: " + typeCount + "; heapUsed: " + sys.getMemoryUsage();
             }
 
             function structuredTypeRelatedTo(source: Type, target: Type, reportErrors: boolean): Ternary {

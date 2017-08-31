@@ -3603,6 +3603,7 @@ namespace ts {
         declarationDir?: string;
         /* @internal */ diagnostics?: boolean;
         /* @internal */ extendedDiagnostics?: boolean;
+        /* @internal */ lowMemoryDiagnostics?: boolean;
         disableSizeLimit?: boolean;
         downlevelIteration?: boolean;
         emitBOM?: boolean;

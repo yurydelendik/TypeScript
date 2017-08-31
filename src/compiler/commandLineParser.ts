@@ -222,6 +222,13 @@ namespace ts {
             description: Diagnostics.Do_not_emit_comments_to_output,
         },
         {
+            name: "reportLowMemory",
+            type: "boolean",
+            showInSimplifiedHelpView: false,
+            category: Diagnostics.Basic_Options,
+            description: Diagnostics.Do_not_emit_comments_to_output,
+        },
+        {
             name: "noEmit",
             type: "boolean",
             showInSimplifiedHelpView: true,
@@ -452,6 +459,12 @@ namespace ts {
             type: "boolean",
             category: Diagnostics.Advanced_Options,
             description: Diagnostics.Show_verbose_diagnostic_information
+        },
+        {
+            name: "lowMemoryDiagnostics",
+            type: "boolean",
+            category: Diagnostics.Advanced_Options,
+            description: Diagnostics.Show_diagnostic_information_after_hitting_a_low_memory_state
         },
         {
             name: "traceResolution",
