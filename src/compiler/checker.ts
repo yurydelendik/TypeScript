@@ -52,7 +52,7 @@ namespace ts {
         const Type = objectAllocator.getTypeConstructor();
         const Signature = objectAllocator.getSignatureConstructor();
 
-        let allTypes: Type[];
+        let allTypes: [Type, number][];
         let typeCount = 0;
         let symbolCount = 0;
         let enumCount = 0;
@@ -1969,7 +1969,7 @@ namespace ts {
                 if (!allTypes) {
                     allTypes = [];
                 }
-                allTypes[typeCount] = result;
+                allTypes[typeCount] = [result, 0];
             }
             return result;
         }
@@ -9276,15 +9276,46 @@ namespace ts {
                     relation.set(id, reportErrors ? RelationComparisonResult.FailedAndReported : RelationComparisonResult.Failed);
                     maybeCount = maybeStart;
                 }
-                if (compilerOptions.lowMemoryDiagnostics && sys.getMemoryUsage && sys.getMemoryUsage() > 1.35e8) {
-                    throw new Error("Compilation too big. " + importantDiagnostics());
+                if (compilerOptions.lowMemoryDiagnostics && sys.getMemoryUsage && sys.getMemoryUsage() > 1.35e9) {
+                    throw new Error("Compilation too big. " + lowMemoryDiagnostics());
                 }
                 return result;
             }
 
-            function importantDiagnostics() {
+            function lowMemoryDiagnostics() {
                 // loop through the relation looking up types in allTypes cache. Just dump the count initially, then try dereferencing them later
-                return "relation.size: " + relation.size + "; typeCount: " + typeCount + "; heapUsed: " + sys.getMemoryUsage();
+                relation.forEach((_v, k) => {
+                    Debug.assert(/([-=0-9]+),([-=0-9]+)/.test(k), k);
+                    const [,one,two] = /([-=0-9]+),([-=0-9]+)/.exec(k);
+                    for (const n of parseRelationKey(one).concat(parseRelationKey(two))) {
+                        allTypes[n][1]++;
+                    }
+                });
+                const sorted = allTypes.sort(([_ta,na], [_tb, nb]) => nb - na);
+                let topTypes = '';
+                for (let i = 0; i < 10; i++) {
+                    topTypes += typeToString(sorted[i][0], undefined, TypeFormatFlags.NoTruncation) + ":" + sorted[i][1] + "\n";
+                }
+                return "relation.size: " + relation.size + "; typeCount: " + typeCount + "; heapUsed: " + sys.getMemoryUsage() + "; Top Types:" + topTypes;
+            }
+
+            function parseRelationKey(key: string): number[] {
+                // could be: 1,1 or 1=1-1-1-=1,2-2-2-2=2-2
+                const ns = [];
+                let re = /^\d+|[-=]\d+/g;
+                let m: RegExpExecArray | null;
+                while((m = re.exec(key)) !== null) {
+                    if (m[0][0] === '-') {
+                        ns.push(parseInt(m[0].slice(1), 10))
+                    }
+                    else if (m[0][0] === '=') {
+                        // skip, this is just an index
+                    }
+                    else {
+                        ns.push(parseInt(m[0], 10));
+                    }
+                }
+                return ns;
             }
 
             function structuredTypeRelatedTo(source: Type, target: Type, reportErrors: boolean): Ternary {
