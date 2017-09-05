@@ -9292,11 +9292,13 @@ namespace ts {
                     }
                 });
                 const sorted = allTypes.sort(([_ta,na], [_tb, nb]) => nb - na);
-                let topTypes = '';
-                for (let i = 0; i < 10; i++) {
-                    topTypes += typeToString(sorted[i][0], undefined, TypeFormatFlags.NoTruncation) + ":" + sorted[i][1] + "\n";
+                let topTypes = '\n';
+                for (let i = 0; i < 50; i++) {
+                    const [type, count] = sorted[i];
+                    const file = type.symbol && type.symbol.declarations && type.symbol.declarations.length && getSourceFileOfNode(type.symbol.declarations[0]);
+                    topTypes += count + ": " + typeToString(type, undefined, TypeFormatFlags.NoTruncation) + " in " + ((file && file.fileName) || "<file not found>") + '\n';
                 }
-                return "relation.size: " + relation.size + "; typeCount: " + typeCount + "; heapUsed: " + sys.getMemoryUsage() + "; Top Types:" + topTypes;
+                return "relation.size: " + relation.size + "; typeCount: " + typeCount + " symbolCount: " + symbolCount + "; heapUsed: " + sys.getMemoryUsage() + "; Top Types:" + topTypes;
             }
 
             function parseRelationKey(key: string): number[] {
