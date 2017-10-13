@@ -844,12 +844,13 @@ namespace ts {
                 // clear the requested context flags
                 setContextFlag(/*val*/ false, contextFlagsToClear);
                 let result: T;
-                try {
+                //try {
                     result = func();
-                } finally {
+                //}
+                //finally {
                     // restore the context flags we just cleared
                     setContextFlag(/*val*/ true, contextFlagsToClear);
-                }
+                //}
                 return result;
             }
 
@@ -869,13 +870,13 @@ namespace ts {
                 // set the requested context flags
                 setContextFlag(/*val*/ true, contextFlagsToSet);
                 let result: T;
-                try {
+                //try {
                     result = func();
-                }
-                finally {
+                //}
+                //finally {
                     // reset the context flags we just set
                     setContextFlag(/*val*/ false, contextFlagsToSet);
-                }
+                //}
                 return result;
             }
 
@@ -1026,10 +1027,12 @@ namespace ts {
                 if (e !== GIVE_UP_SPECULATION) {
                     throw e;
                 }
-            } finally {
+            }
+            //finally {
                 inSpeculation = saveInSpeculation;
 
-                Debug.assert(saveContextFlags === contextFlags);
+                //Debug.assert(saveContextFlags === contextFlags);
+                contextFlags = saveContextFlags;
 
                 // If our callback returned something 'falsy' or we're just looking ahead,
                 // then unconditionally restore us to where we were.
@@ -1038,7 +1041,7 @@ namespace ts {
                     parseDiagnostics.length = saveParseDiagnosticsLength;
                     parseErrorBeforeNextFinishedNode = saveParseErrorBeforeNextFinishedNode;
                 }
-            }
+            //}
             return result;
         }
 
@@ -2359,13 +2362,13 @@ namespace ts {
                 setAwaitContext(!!(flags & SignatureFlags.Await));
 
                 let result;
-                try {
+                //try {
                     result = parseDelimitedList(ParsingContext.Parameters, flags & SignatureFlags.JSDoc ? parseJSDocParameter : parseParameter);
-                }
-                finally {
+                //}
+                //finally {
                     setYieldContext(savedYieldContext);
                     setAwaitContext(savedAwaitContext);
-                }
+                //}
 
                 if (!parseExpected(SyntaxKind.CloseParenToken) && (flags & SignatureFlags.RequireCompleteParameterList)) {
                     // Caller insisted that we had to end with a )   We didn't.  So just return
@@ -3032,18 +3035,18 @@ namespace ts {
             }
 
             let expr;
-            try {
+            //try {
                 expr = parseAssignmentExpressionOrHigher();
                 let operatorToken: BinaryOperatorToken;
                 while ((operatorToken = parseOptionalToken(SyntaxKind.CommaToken))) {
                     expr = makeBinaryExpression(expr, operatorToken, parseAssignmentExpressionOrHigher());
                 }
-            }
-            finally {
+            //}
+            //finally {
                 if (saveDecoratorContext) {
                     setDecoratorContext(/*val*/ true);
                 }
-            }
+            //}
 
             return expr;
         }
@@ -4540,7 +4543,7 @@ namespace ts {
                 setDecoratorContext(/*val*/ false);
             }
             let node;
-            try {
+            //try {
                 node = <FunctionExpression>createNode(SyntaxKind.FunctionExpression);
                 node.modifiers = parseModifiers();
                 parseExpected(SyntaxKind.FunctionKeyword);
@@ -4556,12 +4559,12 @@ namespace ts {
 
                 fillSignature(SyntaxKind.ColonToken, isGenerator | isAsync, node);
                 node.body = parseFunctionBlock(isGenerator | isAsync);
-            }
-            finally {
+            //}
+            //finally {
                 if (saveDecoratorContext) {
                     setDecoratorContext(/*val*/ true);
                 }
-            }
+            //}
 
             return addJSDocComment(finishNode(node));
         }
@@ -4621,17 +4624,17 @@ namespace ts {
             }
 
             let block;
-            try {
+            //try {
                 block = parseBlock(!!(flags & SignatureFlags.IgnoreMissingOpenBrace), diagnosticMessage);
-            }
-            finally {
+            //}
+            //finally {
                 if (saveDecoratorContext) {
                     setDecoratorContext(/*val*/ true);
                 }
 
                 setYieldContext(savedYieldContext);
                 setAwaitContext(savedAwaitContext);
-            }
+            //}
 
             return block;
         }
@@ -5288,12 +5291,12 @@ namespace ts {
             else {
                 const savedDisallowIn = inDisallowInContext();
                 setDisallowInContext(inForStatementInitializer);
-                try {
+                //try {
                     node.declarations = parseDelimitedList(ParsingContext.VariableDeclarations, parseVariableDeclaration);
-                }
-                finally {
+                //}
+                //finally {
                     setDisallowInContext(savedDisallowIn);
-                }
+                //}
             }
 
             return finishNode(node);
